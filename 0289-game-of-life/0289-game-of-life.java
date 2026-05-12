@@ -1,45 +1,35 @@
  class Solution {
     public void gameOfLife(int[][] board) {
 
-        int m = board.length;
-        int n = board[0].length;
-
-        int[] row = {-1, -1, -1, 0, 0, 1, 1, 1};
-        int[] col = {-1, 0, 1, -1, 1, -1, 0, 1};
+        int m = board.length, n = board[0].length;
 
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
 
                 int live = 0;
 
-                for (int k = 0; k < 8; k++) {
-                    int ni = i + row[k];
-                    int nj = j + col[k];
+                for (int r = i - 1; r <= i + 1; r++) {
+                    for (int c = j - 1; c <= j + 1; c++) {
 
-                    if (ni >= 0 && nj >= 0 && ni < m && nj < n &&
-                        (board[ni][nj] == 1 || board[ni][nj] == -1)) {
-                        live++;
+                        if (r >= 0 && c >= 0 && r < m && c < n &&
+                            !(r == i && c == j) &&
+                            Math.abs(board[r][c]) == 1) {
+                            live++;
+                        }
                     }
                 }
 
-                if (board[i][j] == 1 && (live < 2 || live > 3)) {
+                if (board[i][j] == 1 && (live < 2 || live > 3))
                     board[i][j] = -1;
-                }
 
-                if (board[i][j] == 0 && live == 3) {
+                if (board[i][j] == 0 && live == 3)
                     board[i][j] = 2;
-                }
             }
         }
 
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
-
-                if (board[i][j] == -1) {
-                    board[i][j] = 0;
-                } else if (board[i][j] == 2) {
-                    board[i][j] = 1;
-                }
+                board[i][j] = board[i][j] > 0 ? 1 : 0;
             }
         }
     }
