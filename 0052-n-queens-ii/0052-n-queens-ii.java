@@ -1,57 +1,44 @@
 class Solution {
-
-    private int solve(int n, int col, char[][] board,
-                      int[] visitedRow, int[] lowerDiagonal,
-                      int[] upperDiagonal, int ans) {
-
-        if (col == n) {
-            return ans + 1;
+    int count = 0;
+    public int totalNQueens(int n) {
+        int[][] arr = new int[n][n];
+        Solve(0, arr);
+        return count;
+    }
+    public void Solve(int row, int[][] arr) {
+        if (row == arr.length) {
+            count++;
+            return;
         }
-
-        for (int row = 0; row < n; row++) {
-
-            if (visitedRow[row] == 0
-                    && lowerDiagonal[row + col] == 0
-                    && upperDiagonal[n - row + col - 1] == 0) {
-
-                board[row][col] = 'Q';
-
-                visitedRow[row] = 1;
-                lowerDiagonal[row + col] = 1;
-                upperDiagonal[n - row + col - 1] = 1;
-
-                ans = solve(n, col + 1, board,
-                            visitedRow, lowerDiagonal,
-                            upperDiagonal, ans);
-
-                board[row][col] = '.';
-
-                visitedRow[row] = 0;
-                lowerDiagonal[row + col] = 0;
-                upperDiagonal[n - row + col - 1] = 0;
+        for (int col = 0; col < arr.length; col++) {
+            if (canSeat(row, col, arr)) {
+                arr[row][col] = 1;
+                Solve(row + 1, arr);
+                arr[row][col] = 0;
             }
         }
-
-        return ans;
     }
-
-    public int totalNQueens(int n) {
-
-        int ans = 0;
-
-        char[][] board = new char[n][n];
-
-        for (int i = 0; i < n; i++) {
-            Arrays.fill(board[i], '.');
+    public boolean canSeat(int row, int col, int[][] arr) {
+        // Check column
+        for (int i = 0; i < row; i++) {
+            if (arr[i][col] == 1) {
+                return false;
+            }
         }
-
-        int[] visitedRow = new int[n];
-        int[] lowerDiagonal = new int[2 * n - 1];
-        int[] upperDiagonal = new int[2 * n - 1];
-
-        ans = solve(n, 0, board, visitedRow,
-                    lowerDiagonal, upperDiagonal, ans);
-
-        return ans;
+        // Check upper-left diagonal
+        for (int i = row - 1, j = col - 1;
+             i >= 0 && j >= 0; i--, j--) {
+            if (arr[i][j] == 1) {
+                return false;
+            }
+        }
+        // Check upper-right diagonal
+        for (int i = row - 1, j = col + 1;
+             i >= 0 && j < arr.length; i--, j++) {
+            if (arr[i][j] == 1) {
+                return false;
+            }
+        }
+        return true;
     }
 }
