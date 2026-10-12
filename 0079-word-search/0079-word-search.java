@@ -1,25 +1,46 @@
-class Solution {
+ class Solution {
     private int rows;
     private int cols;
-    private Set<String> visited;
+    private String word;
+
+    private final int[] dr = {-1, 1, 0, 0};
+    private final int[] dc = {0, 0, -1, 1};
 
     public boolean exist(char[][] board, String word) {
-        rows = board.length;
-        cols = board[0].length;
-        visited = new HashSet<>();
+        this.rows = board.length;
+        this.cols = board[0].length;
+        this.word = word;
 
-        Map<Character, Integer> count = new HashMap<>();
-        for (char c : word.toCharArray()) {
-            count.put(c, count.getOrDefault(c, 0) + 1);
+        int[] boardFreq = new int[128];
+        int[] wordFreq = new int[128];
+
+        for (char[] row : board) {
+            for (char ch : row) {
+                boardFreq[ch]++;
+            }
         }
 
-        if (count.getOrDefault(word.charAt(0), 0) > count.getOrDefault(word.charAt(word.length() - 1), 0)) {
-            word = new StringBuilder(word).reverse().toString();
+        for (char ch : word.toCharArray()) {
+            wordFreq[ch]++;
+
+            if (wordFreq[ch] > boardFreq[ch]) {
+                return false;
+            }
         }
 
+        /*
+         * Start from the rarer character.
+         * This can significantly reduce the number of starting points.
+         */
+        if (boardFreq[word.charAt(0)] > boardFreq[word.charAt(word.length() - 1)]) {
+            this.word = new StringBuilder(word).reverse().toString();
+        }
+
+        // Try every cell as a starting point
         for (int r = 0; r < rows; r++) {
             for (int c = 0; c < cols; c++) {
-                if (dfs(board, word, r, c, 0)) {
+                if (board[r][c] == this.word.charAt(0)
+                        && dfs(board, r, c, 0)) {
                     return true;
                 }
             }
@@ -28,21 +49,37 @@ class Solution {
         return false;
     }
 
-    private boolean dfs(char[][] board, String word, int r, int c, int k) {
-        if (k == word.length()) {
+    private boolean dfs(char[][] board, int r, int c, int index) {
+        // All characters have been matched
+        if (index == word.length()) {
             return true;
         }
 
-        if (r < 0 || r >= rows || c < 0 || c >= cols || visited.contains(r + "," + c) || board[r][c] != word.charAt(k)) {
+        // Boundary check
+        if (r < 0 || r >= rows || c < 0 || c >= cols) {
             return false;
         }
 
-        visited.add(r + "," + c);
-        boolean res = dfs(board, word, r + 1, c, k + 1) ||
-                      dfs(board, word, r - 1, c, k + 1) ||
-                      dfs(board, word, r, c + 1, k + 1) ||
-                      dfs(board, word, r, c - 1, k + 1);
-        visited.remove(r + "," + c);
-        return res;
-    }    
+        // Character mismatch or already visited
+        if (board[r][c] != word.charAt(index)) {
+            return false;
+        }
+
+        // Mark current cell as visited
+        char original = board[r][c];
+        board[r][c] = '#';
+
+        // Explore four directions
+        for (int d = 0; d < 4; d++) {
+            if (dfs(board, r + dr[d], c + dc[d], index + 1)) {
+                board[r][c] = original;
+                return true;
+            }
+        }
+
+        // Backtrack: restore the cell
+        board[r][c] = original;
+
+        return false;
+    }
 }
